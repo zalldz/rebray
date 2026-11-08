@@ -291,3 +291,15 @@ main.page section.adm{padding-top:56px}
   .adm .table.cards td.act .btn-sm{width:100%}
   .settings .btn{width:100%}
 }
+
+/* admin: section jump nav + product editor */
+.adm-nav{position:sticky;top:70px;z-index:30;padding:10px 0;background:var(--bg)}
+.pedit{margin-top:12px;padding:0}
+main.page section.adm{scroll-margin-top:130px}
+.pedit summary{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;cursor:pointer;min-height:44px;align-items:center}
+.pedit summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.pedit[open] summary{border-bottom:1px solid rgba(255,255,255,.08)}
+.pedit form{padding:0 20px 20px}
+.pedit .off{color:#ffc93c}
+.settings .check{display:flex;gap:10px;align-items:center;min-height:44px}
+@media (max-width:700px){.adm-nav{flex-wrap:nowrap;overflow-x:auto;top:64px;scrollbar-width:none}.adm-nav a{flex:none}main.page section.adm{scroll-margin-top:130px}}

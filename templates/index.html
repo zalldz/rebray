@@ -5,10 +5,9 @@
 <header id="hero">
   <canvas id="bg3d"></canvas>
   <div class="hero-inner">
-    <span class="tag">♻️ RECYCLE BRAY</span>
-    <h1>Dari Sampah<br>jadi <span class="grad">Barang Berguna.</span></h1>
-    <p class="hero-sub">REBRAY mengolah sisa filament, cetakan gagal, dan plastik daur ulang
-    menjadi barang 3D yang benar-benar dipakai sehari-hari — bukan sekadar pajangan.</p>
+    <span class="tag">{{ site.hero_tag }}</span>
+    <h1>{{ site.hero_title }}<br><span class="grad">{{ site.hero_highlight }}</span></h1>
+    <p class="hero-sub">{{ site.hero_sub }}</p>
     <div class="cta">
       <a class="btn btn-primary" href="{{ url_for('shop') }}">Explore Products →</a>
       <a class="btn btn-ghost" href="#contact">Start Custom Project</a>
@@ -21,12 +20,8 @@
   <div class="philosophy">
     <div class="reveal">
       <div class="kicker">FILOSOFI KAMI</div>
-      <h2>Sisa bukan akhir,<br>tapi bahan awal.</h2>
-      <p class="lead">Setiap 3D printing menyisakan potongan filament, support, dan cetakan gagal yang biasanya
-      berakhir di tempat sampah. REBRAY mengumpulkan sisa itu, memilah per jenis dan warna, lalu memakainya
-      lagi untuk mencetak barang yang berguna.</p>
-      <p class="lead">Hasilnya: gantungan kunci, clicker, organizer, dan barang custom dengan jejak plastik
-      yang lebih kecil. Warnanya kadang unik karena campuran sisa — dan justru itu ciri khasnya.</p>
+      <h2>{{ site.philosophy_title }}</h2>
+      {% for para in site.philosophy_text.split('\n\n') %}<p class="lead">{{ para }}</p>{% endfor %}
     </div>
     <div class="grid4 reveal" style="margin-top:0">
       <div class="card"><div class="num">01</div><div class="icon">◇</div><h3>Daur Ulang</h3><p>Sisa filament & cetakan gagal dipakai lagi, bukan dibuang.</p></div>
@@ -59,8 +54,8 @@
 
 <section id="products" class="strip"><div class="wrap">
   <div class="kicker reveal">SHOP</div>
-  <h2 class="reveal">Produk siap cetak.</h2>
-  <p class="lead reveal">Desain populer yang tinggal order — atau request modif sesuai seleramu.</p>
+  <h2 class="reveal">{{ site.shop_title }}</h2>
+  <p class="lead reveal">{{ site.shop_sub }}</p>
   <div class="products">
     {% set reveal = true %}{% for p in products %}{% include "_prod_card.html" %}{% endfor %}
   </div>
@@ -79,11 +74,11 @@
 <section id="contact"><div class="wrap">
   <div class="contact-box reveal">
     <div class="kicker">CONTACT</div>
-    <h2>Punya ide? Wujudkan.</h2>
-    <p class="lead">Ceritakan ide atau kebutuhanmu — REBRAY bantu dari sketsa sampai barang jadi — sebisa mungkin dari bahan daur ulang.</p>
+    <h2>{{ site.contact_title }}</h2>
+    <p class="lead">{{ site.contact_text }}</p>
     <div class="cta">
       <a class="btn btn-primary" href="https://wa.me/{{ wa_number }}?text={{ 'Halo REBRAY, saya mau custom desain'|urlencode }}">💬 WhatsApp</a>
-      <a class="btn btn-ghost" href="mailto:hello@bray3d.id">✉️ Email</a>
+      <a class="btn btn-ghost" href="mailto:{{ site.contact_email }}">✉️ Email</a>
     </div>
   </div>
 </div></section>

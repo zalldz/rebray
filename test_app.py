@@ -91,6 +91,9 @@ assert c.get("/admin").status_code == 404
 assert c.post("/admin/orders/1/status", data={"csrf": t, "new_status": "paid"}).status_code == 404
 assert c.post("/admin/settings", data={"csrf": t}).status_code == 404
 assert c.post("/admin/products/1", data={"csrf": t, "price_idr": "1"}).status_code == 404
+assert c.post("/admin/products/new", data={"csrf": t}).status_code == 404
+assert c.post("/admin/content", data={"csrf": t}).status_code == 404
+assert c.post("/admin/users/1/admin", data={"csrf": t, "is_admin": "1"}).status_code == 404
 assert 'href="/admin"' not in c.get("/shop").text
 c.post("/logout", data={"csrf": t})
 assert c.get("/admin").status_code == 404  # logged out: 404 too, not a login redirect
@@ -124,12 +127,39 @@ assert "Harga harus angka" in c.post("/admin/settings", data={"csrf": t, "price_
 assert db.execute("SELECT value FROM settings WHERE key='price_per_gram_idr'").fetchone()[0] == "2000"  # bad input ignored
 
 cid = db.execute("SELECT id FROM products WHERE slug='clicker'").fetchone()[0]
-c.post(f"/admin/products/{cid}", data={"csrf": t, "price_idr": "27000", "marketplace_url": "javascript:alert(1)", "is_ready_stock": "1"})
+pf = {"csrf": t, "name": "Clicker Fidget", "emoji": "🔷", "description": "d", "active": "1"}
+c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000", "marketplace_url": "javascript:alert(1)", "is_ready_stock": "1"})
 assert db.execute("SELECT price_idr FROM products WHERE id=?", (cid,)).fetchone()[0] == 25000  # rejected
-c.post(f"/admin/products/{cid}", data={"csrf": t, "price_idr": "27000", "marketplace_url": "https://shopee.co.id/x"})
-assert db.execute("SELECT price_idr, is_ready_stock, marketplace_url FROM products WHERE id=?", (cid,)).fetchone() \
-    == (27000, 0, "https://shopee.co.id/x")
+c.post(f"/admin/products/{cid}", data={**pf, "name": "", "price_idr": "1"})
+assert db.execute("SELECT price_idr FROM products WHERE id=?", (cid,)).fetchone()[0] == 25000  # empty name rejected
+c.post(f"/admin/products/{cid}", data={**pf, "name": "Clicker Pro", "price_idr": "27000", "marketplace_url": "https://shopee.co.id/x"})
+assert db.execute("SELECT name, price_idr, is_ready_stock, marketplace_url FROM products WHERE id=?", (cid,)).fetchone() \
+    == ("Clicker Pro", 27000, 0, "https://shopee.co.id/x")
 assert 'action="/cart/add/clicker"' in c.get("/shop/clicker").text  # no longer ready stock
+c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000", "active": ""})  # hide
+assert c.get("/shop/clicker").status_code == 404 and "/shop/clicker" not in c.get("/shop").text
+c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000"})
+# new product: slug derived from name, unique
+for _ in range(2):
+    c.post("/admin/products/new", data={**pf, "name": "Vas Bunga!", "emoji": "🌸", "price_idr": "30000"})
+assert c.get("/shop/vas-bunga").status_code == 200 and c.get("/shop/vas-bunga-2").status_code == 200
+# site content
+from db import SITE_TEXTS
+content = {"csrf": t, **{k: v for k, (_l, v) in SITE_TEXTS.items()}}
+c.post("/admin/content", data={**content, "hero_title": "Judul <b>Baru</b>", "philosophy_text": "P1\r\n\r\nP2"})
+home = c.get("/").text
+assert "Judul &lt;b&gt;Baru&lt;/b&gt;" in home and "<p class=\"lead\">P1</p><p class=\"lead\">P2</p>" in home
+assert "Wajib diisi" in c.post("/admin/content", data={**content, "hero_sub": ""}, follow_redirects=True).text
+assert "Email kontak" in c.post("/admin/content", data={**content, "contact_email": "x"}, follow_redirects=True).text
+# user role: can't demote self, can promote others
+me = db.execute("SELECT id FROM users WHERE email='admin@x.id'").fetchone()[0]
+c.post(f"/admin/users/{me}/admin", data={"csrf": t, "is_admin": "0"})
+assert db.execute("SELECT is_admin FROM users WHERE id=?", (me,)).fetchone()[0] == 1
+other = db.execute("SELECT id FROM users WHERE email!='admin@x.id'").fetchone()[0]
+c.post(f"/admin/users/{other}/admin", data={"csrf": t, "is_admin": "1"})
+assert db.execute("SELECT is_admin FROM users WHERE id=?", (other,)).fetchone()[0] == 1
+c.post(f"/admin/users/{other}/admin", data={"csrf": t, "is_admin": "0"})
+assert c.get("/admin").status_code == 200
 
 # ADMIN_EMAIL auto-promote on register
 c.post("/logout", data={"csrf": t})

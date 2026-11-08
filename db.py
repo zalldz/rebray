@@ -85,7 +85,32 @@ MARKETPLACE = {
 def default_settings():
     return {"price_per_gram_idr": "1500", "min_price_idr": "25000",
             "wa_number": os.environ.get("WHATSAPP_NUMBER", "6282299130985"),
-            "shipping_note": "Belum termasuk ongkir — dihitung terpisah sesuai alamat pengiriman."}
+            "shipping_note": "Belum termasuk ongkir — dihitung terpisah sesuai alamat pengiriman.",
+            **{k: v for k, (_label, v) in SITE_TEXTS.items()}}
+
+
+# Website copy editable from /admin → Konten. key: (label, default)
+SITE_TEXTS = {
+    "hero_tag": ("Label kecil di atas judul", "♻️ RECYCLE BRAY"),
+    "hero_title": ("Judul utama (baris 1)", "Dari Sampah"),
+    "hero_highlight": ("Judul utama (baris 2, berwarna)", "jadi Barang Berguna."),
+    "hero_sub": ("Teks pembuka", "REBRAY mengolah sisa filament, cetakan gagal, dan plastik daur ulang menjadi barang 3D "
+                 "yang benar-benar dipakai sehari-hari — bukan sekadar pajangan."),
+    "philosophy_title": ("Judul Filosofi", "Sisa bukan akhir, tapi bahan awal."),
+    "philosophy_text": ("Isi Filosofi (pisahkan paragraf dengan baris kosong)",
+                        "Setiap 3D printing menyisakan potongan filament, support, dan cetakan gagal yang biasanya "
+                        "berakhir di tempat sampah. REBRAY mengumpulkan sisa itu, memilah per jenis dan warna, lalu "
+                        "memakainya lagi untuk mencetak barang yang berguna.\n\nHasilnya: gantungan kunci, clicker, "
+                        "organizer, dan barang custom dengan jejak plastik yang lebih kecil. Warnanya kadang unik karena "
+                        "campuran sisa — dan justru itu ciri khasnya."),
+    "shop_title": ("Judul Shop", "Produk siap cetak."),
+    "shop_sub": ("Teks Shop", "Desain populer yang tinggal order — atau request modif sesuai seleramu."),
+    "contact_title": ("Judul Kontak", "Punya ide? Wujudkan."),
+    "contact_text": ("Teks Kontak", "Ceritakan ide atau kebutuhanmu — REBRAY bantu dari sketsa sampai barang jadi — "
+                     "sebisa mungkin dari bahan daur ulang."),
+    "contact_email": ("Email kontak", "hello@bray3d.id"),
+    "footer_text": ("Teks footer", "© 2026 REBRAY — Recycle Bray — From Waste to Useful"),
+}
 
 
 def connect():

@@ -4,6 +4,10 @@
 {% block content %}
 <div class="kicker">ADMIN</div>
 <h2>Dashboard</h2>
+<div class="tabs adm-nav" role="navigation" aria-label="Bagian admin">
+  <a href="#pesanan">📦 Pesanan</a><a href="#produk">🛍️ Produk</a><a href="#konten">📝 Konten Website</a>
+  <a href="#pengaturan">⚙️ Harga & WA</a><a href="#user">👤 User</a>
+</div>
 
 <div class="stats">
   <div class="card"><div class="num">TOTAL PESANAN</div><b>{{ stats[0] }}</b></div>
@@ -49,27 +53,54 @@
   {% endif %}
 </section>
 
+{% macro product_fields(p) %}
+    <label><span class="field">Nama</span><input class="text" name="name" maxlength="80" required value="{{ p.name }}"></label>
+    <label><span class="field">Ikon (emoji)</span><input class="text" name="emoji" maxlength="8" required value="{{ p.emoji or '📦' }}"></label>
+    <label><span class="field">Harga (Rp, 0 = quote)</span><input class="text" name="price_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ p.price_idr or 0 }}"></label>
+    <label class="wide"><span class="field">Deskripsi</span><textarea class="text" name="description" rows="2" maxlength="500">{{ p.description }}</textarea></label>
+    <label class="wide"><span class="field">Link marketplace (Shopee/Tokopedia)</span><input class="text" name="marketplace_url" type="url" value="{{ p.marketplace_url or '' }}" placeholder="https://…"></label>
+    <label class="check"><input type="checkbox" class="tick" name="is_ready_stock" value="1"{% if p.is_ready_stock %} checked{% endif %}> Ready stock (beli lewat marketplace)</label>
+    <label class="check"><input type="checkbox" class="tick" name="active" value="1"{% if p.active is not defined or p.active %} checked{% endif %}> Tampil di website</label>
+{% endmacro %}
 <section id="produk" class="adm">
   <h3>Produk</h3>
-  <div class="table-wrap"><table class="table cards">
-    <thead><tr><th>PRODUK</th><th>READY STOCK</th><th>LINK MARKETPLACE</th><th>HARGA (RP)</th><th></th></tr></thead>
-    <tbody>
-    {% for p in products %}
-    <tr>
-      <td>{{ p.emoji }} {{ p.name }}</td>
-      <td data-label="Ready stock"><input type="checkbox" class="tick" form="p{{ p.id }}" name="is_ready_stock" value="1" aria-label="Ready stock {{ p.name }}"{% if p.is_ready_stock %} checked{% endif %}></td>
-      <td data-label="Link"><input class="text" form="p{{ p.id }}" name="marketplace_url" type="url" value="{{ p.marketplace_url or '' }}" placeholder="https://…" aria-label="Link marketplace {{ p.name }}"></td>
-      <td data-label="Harga"><input class="text" form="p{{ p.id }}" name="price_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ p.price_idr }}" aria-label="Harga {{ p.name }}"></td>
-      <td class="act"><form id="p{{ p.id }}" method="post" action="{{ url_for('admin_product', product_id=p.id) }}">{{ keep() }}<button class="btn-sm btn-primary" type="submit">Simpan</button></form></td>
-    </tr>
+  <p class="muted hint">Klik produk untuk mengedit. Hapus centang "Tampil di website" untuk menyembunyikan produk (riwayat pesanan tetap aman).</p>
+  {% for p in products %}
+  <details class="panel pedit">
+    <summary><span>{{ p.emoji }} <b>{{ p.name }}</b></span>
+      <span class="muted">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Quote{% endif %}{% if p.is_ready_stock %} · Ready stock{% endif %}{% if not p.active %} · <span class="off">Disembunyikan</span>{% endif %}</span></summary>
+    <form class="settings" method="post" action="{{ url_for('admin_product', product_id=p.id) }}">{{ keep() }}
+      {{ product_fields(p) }}
+      <button class="btn btn-primary" type="submit">Simpan Produk</button>
+    </form>
+  </details>
+  {% endfor %}
+  <details class="panel pedit">
+    <summary><b>➕ Tambah produk baru</b></summary>
+    <form class="settings" method="post" action="{{ url_for('admin_product_new') }}">{{ keep() }}
+      {{ product_fields({}) }}
+      <button class="btn btn-primary" type="submit">Tambah Produk</button>
+    </form>
+  </details>
+</section>
+
+<section id="konten" class="adm">
+  <h3>Konten Website</h3>
+  <p class="muted hint">Teks di halaman depan & footer. Perubahan langsung tampil setelah disimpan.</p>
+  <form class="panel settings" method="post" action="{{ url_for('admin_content') }}">{{ keep() }}
+    {% for k, (label, _d) in site_texts.items() %}
+    {% if settings[k]|length > 80 or '\n' in settings[k] %}
+    <label class="wide"><span class="field">{{ label }}</span><textarea class="text" name="{{ k }}" rows="{{ 5 if '\n' in settings[k] else 3 }}" maxlength="2000" required>{{ settings[k] }}</textarea></label>
+    {% else %}
+    <label><span class="field">{{ label }}</span><input class="text" name="{{ k }}" maxlength="2000" required value="{{ settings[k] }}"{% if k == 'contact_email' %} type="email"{% endif %}></label>
+    {% endif %}
     {% endfor %}
-    </tbody>
-  </table></div>
-  <p class="muted hint">Harga 0 = "Quote project".</p>
+    <button class="btn btn-primary" type="submit">Simpan Konten</button>
+  </form>
 </section>
 
 <section id="pengaturan" class="adm">
-  <h3>Pengaturan</h3>
+  <h3>Harga & WhatsApp</h3>
   <form class="panel settings" method="post" action="{{ url_for('admin_settings') }}">{{ keep() }}
     <label><span class="field">Harga per gram (Rp)</span><input class="text" name="price_per_gram_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ settings.price_per_gram_idr }}"></label>
     <label><span class="field">Harga minimum (Rp)</span><input class="text" name="min_price_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ settings.min_price_idr }}"></label>
@@ -82,10 +113,15 @@
 <section id="user" class="adm">
   <h3>User</h3>
   <div class="table-wrap"><table class="table cards">
-    <thead><tr><th>EMAIL</th><th>NAMA</th><th>BERGABUNG</th><th class="num">PESANAN</th></tr></thead>
+    <thead><tr><th>EMAIL</th><th>NAMA</th><th>BERGABUNG</th><th class="num">PESANAN</th><th>ADMIN</th></tr></thead>
     <tbody>
     {% for u in users %}
-    <tr><td>{{ u.email }}</td><td data-label="Nama">{{ u.name }}</td><td data-label="Bergabung">{{ u.created_at[:10] }}</td><td class="num" data-label="Pesanan">{{ u.n_orders }}</td></tr>
+    <tr><td>{{ u.email }}</td><td data-label="Nama">{{ u.name }}</td><td data-label="Bergabung">{{ u.created_at[:10] }}</td><td class="num" data-label="Pesanan">{{ u.n_orders }}</td>
+      <td data-label="Admin">{% if u.id == g.user.id %}<span class="muted">Kamu</span>{% else %}
+        <form class="inline" method="post" action="{{ url_for('admin_user_role', user_id=u.id) }}">{{ keep() }}
+          <input type="hidden" name="is_admin" value="{{ 0 if u.is_admin else 1 }}">
+          <button class="btn-sm {{ 'btn-ghost' if u.is_admin else 'btn-primary' }}" type="submit">{{ 'Cabut admin' if u.is_admin else 'Jadikan admin' }}</button>
+        </form>{% endif %}</td></tr>
     {% endfor %}
     </tbody>
   </table></div>

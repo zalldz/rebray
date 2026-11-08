@@ -10,7 +10,7 @@ from urllib.parse import quote
 from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db import close_db, get_db, init_db
+from db import SITE_TEXTS, close_db, get_db, init_db
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -124,8 +124,9 @@ def inject_globals():
     if g.get("user"):
         cart_count = get_db().execute(
             "SELECT COALESCE(SUM(qty),0) FROM cart_items WHERE user_id=?", (g.user["id"],)).fetchone()[0]
+    site = get_settings()
     return {"csrf_token": session["csrf"], "cart_count": cart_count, "tools": TOOLS, "status_labels": STATUS_LABELS,
-            "wa_number": get_settings()["wa_number"]}
+            "wa_number": site["wa_number"], "site": site}
 
 
 def login_required(view):
@@ -416,11 +417,12 @@ def admin():
         "(SELECT COALESCE(SUM(total_idr),0) FROM orders WHERE status='paid' "
         " AND strftime('%Y-%m', created_at)=strftime('%Y-%m','now')), "
         "(SELECT COUNT(*) FROM users)").fetchone()
-    users = db.execute("SELECT u.email, u.name, u.created_at, COUNT(o.id) AS n_orders FROM users u "
+    users = db.execute("SELECT u.id, u.email, u.name, u.is_admin, u.created_at, COUNT(o.id) AS n_orders FROM users u "
                        "LEFT JOIN orders o ON o.user_id=u.id GROUP BY u.id ORDER BY u.id DESC").fetchall()
     products = db.execute("SELECT * FROM products ORDER BY id").fetchall()
     return render_template("admin.html", orders=orders, stats=stats, users=users, products=products,
-                           settings=get_settings(), statuses=ORDER_STATUSES, status=status, q=q)
+                           settings=get_settings(), statuses=ORDER_STATUSES, status=status, q=q,
+                           site_texts=SITE_TEXTS)
 
 
 @app.route("/admin/orders/<int:order_id>/status", methods=["POST"])
@@ -456,26 +458,91 @@ def admin_settings():
     return back_to_admin("#pengaturan")
 
 
+def product_form():
+    """Validated product fields from the admin form, or None after flashing the error."""
+    f = {k: request.form.get(k, "").strip() for k in ("name", "emoji", "description", "price_idr", "marketplace_url")}
+    f["is_ready_stock"] = int(request.form.get("is_ready_stock") == "1")
+    f["active"] = int(request.form.get("active") == "1")
+    if not 0 < len(f["name"]) <= 80:
+        flash("Nama produk wajib diisi (maks. 80 karakter).", "error")
+    elif not 0 < len(f["emoji"]) <= 8:
+        flash("Ikon/emoji wajib diisi (contoh 🔑).", "error")
+    elif len(f["description"]) > 500:
+        flash("Deskripsi maks. 500 karakter.", "error")
+    elif not f["price_idr"].isdigit():
+        flash("Harga harus angka bulat ≥ 0 (0 = quote project).", "error")
+    elif f["marketplace_url"] and not (f["marketplace_url"].startswith("https://") and len(f["marketplace_url"]) <= 500):
+        flash("Link marketplace harus diawali https://", "error")  # rendered as href: block javascript: etc.
+    elif f["is_ready_stock"] and not f["marketplace_url"]:
+        flash("Produk ready stock wajib punya link marketplace.", "error")
+    else:
+        f["price_idr"] = int(f["price_idr"])
+        f["marketplace_url"] = f["marketplace_url"] or None
+        return f
+    return None
+
+
+PRODUCT_COLS = ("name", "emoji", "description", "price_idr", "marketplace_url", "is_ready_stock", "active")
+
+
 @app.route("/admin/products/<int:product_id>", methods=["POST"])
 @admin_required
 def admin_product(product_id):
-    price = request.form.get("price_idr", "").strip()
-    url = request.form.get("marketplace_url", "").strip()
-    ready = int(request.form.get("is_ready_stock") == "1")
-    if not price.isdigit():
-        flash("Harga harus angka bulat ≥ 0 (0 = quote project).", "error")
-    elif url and not (url.startswith("https://") and len(url) <= 500):  # rendered as href: block javascript: etc.
-        flash("Link marketplace harus diawali https://", "error")
-    elif ready and not url:
-        flash("Produk ready stock wajib punya link marketplace.", "error")
+    if (f := product_form()) is not None:
+        db = get_db()
+        with db:
+            if db.execute(f"UPDATE products SET {', '.join(c + '=?' for c in PRODUCT_COLS)} WHERE id=?",
+                          [f[c] for c in PRODUCT_COLS] + [product_id]).rowcount == 0:
+                abort(404)
+        flash(f"Produk \"{f['name']}\" disimpan.")
+    return back_to_admin("#produk")
+
+
+@app.route("/admin/products/new", methods=["POST"])
+@admin_required
+def admin_product_new():
+    if (f := product_form()) is not None:
+        db = get_db()
+        base = re.sub(r"[^a-z0-9]+", "-", f["name"].lower()).strip("-") or "produk"
+        slug, n = base, 2
+        while db.execute("SELECT 1 FROM products WHERE slug=?", (slug,)).fetchone():
+            slug, n = f"{base}-{n}", n + 1
+        with db:
+            db.execute(f"INSERT INTO products(slug, {', '.join(PRODUCT_COLS)}) VALUES (?{',?' * len(PRODUCT_COLS)})",
+                       [slug] + [f[c] for c in PRODUCT_COLS])
+        flash(f"Produk \"{f['name']}\" ditambahkan.")
+    return back_to_admin("#produk")
+
+
+@app.route("/admin/content", methods=["POST"])
+@admin_required
+def admin_content():
+    vals = {k: request.form.get(k, "").strip().replace("\r\n", "\n") for k in SITE_TEXTS}
+    if bad := [SITE_TEXTS[k][0] for k, v in vals.items() if not 0 < len(v) <= 2000]:
+        flash(f"Wajib diisi (maks. 2000 karakter): {', '.join(bad)}.", "error")
+    elif not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", vals["contact_email"]):
+        flash("Email kontak tidak valid.", "error")
     else:
         db = get_db()
         with db:
-            if db.execute("UPDATE products SET price_idr=?, marketplace_url=?, is_ready_stock=? WHERE id=?",
-                          (int(price), url or None, ready, product_id)).rowcount == 0:
+            db.executemany("UPDATE settings SET value=? WHERE key=?", [(v, k) for k, v in vals.items()])
+        flash("Konten website disimpan.")
+    return back_to_admin("#konten")
+
+
+@app.route("/admin/users/<int:user_id>/admin", methods=["POST"])
+@admin_required
+def admin_user_role(user_id):
+    if user_id == g.user["id"]:
+        flash("Tidak bisa mengubah akses admin akun sendiri.", "error")  # avoid locking yourself out
+    else:
+        make = int(request.form.get("is_admin") == "1")
+        db = get_db()
+        with db:
+            if db.execute("UPDATE users SET is_admin=? WHERE id=?", (make, user_id)).rowcount == 0:
                 abort(404)
-        flash("Produk diperbarui.")
-    return back_to_admin("#produk")
+        flash("Akses admin diberikan." if make else "Akses admin dicabut.")
+    return back_to_admin("#user")
 
 
 if __name__ == "__main__":
