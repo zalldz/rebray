@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Login — REBRAY{% endblock %}
+{% block content %}
+<form class="form-box" method="post">
+  <div class="kicker">LOGIN</div>
+  <h2>Masuk</h2>
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" required autocomplete="email" value="{{ request.form.email }}">
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" required autocomplete="current-password">
+  <button class="btn btn-primary" type="submit">Login</button>
+  <p class="alt">Belum punya akun? <a href="{{ url_for('register', next=request.args.next) }}">Daftar</a></p>
+</form>
+{% endblock %}

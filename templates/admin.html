@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Admin — REBRAY{% endblock %}
+{% macro keep() %}<input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="status" value="{{ status }}"><input type="hidden" name="q" value="{{ q }}">{% endmacro %}
+{% block content %}
+<div class="kicker">ADMIN</div>
+<h2>Dashboard</h2>
+
+<div class="stats">
+  <div class="card"><div class="num">TOTAL PESANAN</div><b>{{ stats[0] }}</b></div>
+  <div class="card"><div class="num">MENUNGGU</div><b>{{ stats[1] }}</b></div>
+  <div class="card"><div class="num">OMZET BULAN INI (LUNAS)</div><b>{{ stats[2]|rupiah }}</b></div>
+  <div class="card"><div class="num">TOTAL USER</div><b>{{ stats[3] }}</b></div>
+</div>
+
+<section id="pesanan" class="adm">
+  <h3>Pesanan</h3>
+  <div class="tabs" role="group" aria-label="Filter status">
+    <a href="{{ url_for('admin', q=q or None) }}#pesanan"{% if not status %} aria-current="page"{% endif %}>Semua</a>
+    {% for s in statuses %}<a href="{{ url_for('admin', status=s, q=q or None) }}#pesanan"{% if s == status %} aria-current="page"{% endif %}>{{ status_labels[s] }}</a>{% endfor %}
+  </div>
+  <form class="search" method="get" action="{{ url_for('admin') }}#pesanan">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <label class="sr" for="q">Cari pesanan</label>
+    <input class="text" id="q" name="q" value="{{ q }}" placeholder="Cari no. pesanan atau email…">
+    <button class="btn-sm btn-ghost" type="submit">Cari</button>
+  </form>
+  {% if not orders %}<p class="muted" style="margin-top:20px">Tidak ada pesanan.</p>{% else %}
+  <div class="table-wrap"><table class="table cards">
+    <thead><tr><th>NO.</th><th>TANGGAL</th><th>USER</th><th>ITEM</th><th class="num">TOTAL</th><th>STATUS</th></tr></thead>
+    <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="{{ url_for('order_detail', order_id=o.id) }}" style="color:var(--acc)">#{{ o.id }}</a></td>
+      <td data-label="Tanggal">{{ o.created_at[:16] }} UTC</td>
+      <td data-label="User">{{ o.email }}</td>
+      <td data-label="Item">{{ o.first_item or '—' }}{% if o.n_items > 1 %} <span class="muted">+{{ o.n_items - 1 }} lagi</span>{% endif %}</td>
+      <td class="num" data-label="Total">{{ o.total_idr|rupiah }}</td>
+      <td data-label="Status"><form class="inline" method="post" action="{{ url_for('admin_order_status', order_id=o.id) }}">{{ keep() }}
+        <label class="sr" for="st{{ o.id }}">Status pesanan #{{ o.id }}</label>
+        <select class="text" id="st{{ o.id }}" name="new_status">
+          {% for s in statuses %}<option value="{{ s }}"{% if s == o.status %} selected{% endif %}>{{ status_labels[s] }}</option>{% endfor %}
+        </select>
+        <button class="btn-sm btn-primary" type="submit">Simpan</button>
+      </form></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}
+</section>
+
+<section id="produk" class="adm">
+  <h3>Produk</h3>
+  <div class="table-wrap"><table class="table cards">
+    <thead><tr><th>PRODUK</th><th>READY STOCK</th><th>LINK MARKETPLACE</th><th>HARGA (RP)</th><th></th></tr></thead>
+    <tbody>
+    {% for p in products %}
+    <tr>
+      <td>{{ p.emoji }} {{ p.name }}</td>
+      <td data-label="Ready stock"><input type="checkbox" class="tick" form="p{{ p.id }}" name="is_ready_stock" value="1" aria-label="Ready stock {{ p.name }}"{% if p.is_ready_stock %} checked{% endif %}></td>
+      <td data-label="Link"><input class="text" form="p{{ p.id }}" name="marketplace_url" type="url" value="{{ p.marketplace_url or '' }}" placeholder="https://…" aria-label="Link marketplace {{ p.name }}"></td>
+      <td data-label="Harga"><input class="text" form="p{{ p.id }}" name="price_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ p.price_idr }}" aria-label="Harga {{ p.name }}"></td>
+      <td class="act"><form id="p{{ p.id }}" method="post" action="{{ url_for('admin_product', product_id=p.id) }}">{{ keep() }}<button class="btn-sm btn-primary" type="submit">Simpan</button></form></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="muted hint">Harga 0 = "Quote project".</p>
+</section>
+
+<section id="pengaturan" class="adm">
+  <h3>Pengaturan</h3>
+  <form class="panel settings" method="post" action="{{ url_for('admin_settings') }}">{{ keep() }}
+    <label><span class="field">Harga per gram (Rp)</span><input class="text" name="price_per_gram_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ settings.price_per_gram_idr }}"></label>
+    <label><span class="field">Harga minimum (Rp)</span><input class="text" name="min_price_idr" inputmode="numeric" pattern="[0-9]+" required value="{{ settings.min_price_idr }}"></label>
+    <label><span class="field">Nomor WhatsApp (628…)</span><input class="text" name="wa_number" inputmode="tel" pattern="[0-9]{8,15}" required value="{{ settings.wa_number }}"></label>
+    <label class="wide"><span class="field">Catatan ongkir</span><textarea class="text" name="shipping_note" rows="2" maxlength="300" required>{{ settings.shipping_note }}</textarea></label>
+    <button class="btn btn-primary" type="submit">Simpan Pengaturan</button>
+  </form>
+</section>
+
+<section id="user" class="adm">
+  <h3>User</h3>
+  <div class="table-wrap"><table class="table cards">
+    <thead><tr><th>EMAIL</th><th>NAMA</th><th>BERGABUNG</th><th class="num">PESANAN</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+    <tr><td>{{ u.email }}</td><td data-label="Nama">{{ u.name }}</td><td data-label="Bergabung">{{ u.created_at[:10] }}</td><td class="num" data-label="Pesanan">{{ u.n_orders }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

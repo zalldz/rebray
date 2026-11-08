@@ -1,0 +1,8 @@
+{% extends "_tool.html" %}
+{% from "_choice.html" import choice with context %}
+{% block lead %}Pilih model clicker, lalu padukan warna body & aksen.{% endblock %}
+{% block controls %}
+{{ choice("model", "Model", t.fields.model) }}
+{{ choice("body", "Warna body", t.fields.body, "hitam", True) }}
+{{ choice("aksen", "Warna aksen", t.fields.aksen, "hijau", True) }}
+{% endblock %}

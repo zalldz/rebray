@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Shop — REBRAY{% endblock %}
+{% block content %}
+<div class="kicker">SHOP</div>
+<h2>Produk siap cetak.</h2>
+<p class="lead">Desain populer yang tinggal order — atau request modif sesuai seleramu.</p>
+<a class="banner" href="{{ url_for('quote_page') }}">
+  <span class="emoji">🔧</span>
+  <span><b>Punya file STL sendiri?</b><span class="muted">Hitung estimasi harga cetaknya langsung di browser — file tidak di-upload.</span></span>
+  <span class="go">Hitung Harga Cetak →</span>
+</a>
+<div class="products">
+  {% for p in products %}{% include "_prod_card.html" %}{% endfor %}
+</div>
+{% endblock %}

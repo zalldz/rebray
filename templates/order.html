@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Pesanan #{{ order.id }} — REBRAY{% endblock %}
+{% block content %}
+{% set o = order %}
+<div class="kicker"><a href="{{ url_for('orders') }}">← PESANAN</a></div>
+<h2>Pesanan #{{ o.id }}</h2>
+<p class="lead">{{ o.created_at }} UTC · {% include "_status.html" %}</p>
+<div class="table-wrap"><table class="table cards">
+  <thead><tr><th>PRODUK</th><th class="num">HARGA</th><th class="num">JUMLAH</th><th class="num">SUBTOTAL</th></tr></thead>
+  <tbody>
+  {% for i in items %}
+  <tr>
+    <td>{{ i.emoji }} {{ i.name }}{% include "_opts.html" %}</td>
+    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Quote project{% endif %}</td>
+    <td class="num" data-label="Jumlah">{{ i.qty }}</td>
+    <td class="num" data-label="Subtotal">{% if i.price_idr %}{{ (i.qty * i.price_idr)|rupiah }}{% else %}—{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<div class="summary">
+  <div class="total">Total: <b>{{ o.total_idr|rupiah }}</b>{% if o.status == 'pending-quote' %} <span class="muted">+ quote project</span>{% endif %}</div>
+</div>
+<div class="wa-box">
+  <p>Kirim ringkasan pesanan ke admin untuk info pembayaran & pengiriman.</p>
+  <a class="btn btn-wa" href="{{ wa_url }}" target="_blank" rel="noopener">🟢 Lanjut Pembayaran via WhatsApp</a>
+</div>
+{% if o.status == 'pending-quote' %}<p class="muted" style="margin-top:12px">Pesanan ini berisi item custom — kami akan menghubungimu untuk konfirmasi harga.</p>{% endif %}
+{% endblock %}

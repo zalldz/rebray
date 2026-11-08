@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}REBRAY — Recycle Bray — From Waste to Useful{% endblock %}
+{% block body %}
+<div class="wrap" style="position:fixed;top:80px;left:0;right:0;z-index:40">{% include "_flashes.html" %}</div>
+<header id="hero">
+  <canvas id="bg3d"></canvas>
+  <div class="hero-inner">
+    <span class="tag">♻️ RECYCLE BRAY</span>
+    <h1>Dari Sampah<br>jadi <span class="grad">Barang Berguna.</span></h1>
+    <p class="hero-sub">REBRAY mengolah sisa filament, cetakan gagal, dan plastik daur ulang
+    menjadi barang 3D yang benar-benar dipakai sehari-hari — bukan sekadar pajangan.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="{{ url_for('shop') }}">Explore Products →</a>
+      <a class="btn btn-ghost" href="#contact">Start Custom Project</a>
+    </div>
+  </div>
+  <div class="scroll-hint">▼ scroll</div>
+</header>
+
+<section id="philosophy"><div class="wrap">
+  <div class="philosophy">
+    <div class="reveal">
+      <div class="kicker">FILOSOFI KAMI</div>
+      <h2>Sisa bukan akhir,<br>tapi bahan awal.</h2>
+      <p class="lead">Setiap 3D printing menyisakan potongan filament, support, dan cetakan gagal yang biasanya
+      berakhir di tempat sampah. REBRAY mengumpulkan sisa itu, memilah per jenis dan warna, lalu memakainya
+      lagi untuk mencetak barang yang berguna.</p>
+      <p class="lead">Hasilnya: gantungan kunci, clicker, organizer, dan barang custom dengan jejak plastik
+      yang lebih kecil. Warnanya kadang unik karena campuran sisa — dan justru itu ciri khasnya.</p>
+    </div>
+    <div class="grid4 reveal" style="margin-top:0">
+      <div class="card"><div class="num">01</div><div class="icon">◇</div><h3>Daur Ulang</h3><p>Sisa filament & cetakan gagal dipakai lagi, bukan dibuang.</p></div>
+      <div class="card"><div class="num">02</div><div class="icon">+</div><h3>Berguna</h3><p>Yang kami cetak harus dipakai, bukan cuma jadi pajangan.</p></div>
+      <div class="card"><div class="num">03</div><div class="icon">○</div><h3>Personal</h3><p>Produk disesuaikan dengan ukuran, fungsi, dan selera pengguna.</p></div>
+      <div class="card"><div class="num">04</div><div class="icon">↗</div><h3>Eksploratif</h3><p>Terus mencoba cara baru supaya desain & produksi makin baik.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="services"><div class="wrap">
+  <div class="kicker reveal">WHAT WE DO</div>
+  <h2 class="reveal">Dari desain hingga bentuk nyata.</h2>
+  <p class="lead reveal">Beberapa hal yang bisa REBRAY bantu — dari kebutuhan sederhana sampai pengembangan produk awal.</p>
+  <div class="services">
+    <div class="svc reveal"><div class="emoji">🧊</div><h3>3D Modeling</h3>
+      <p>Mengubah sketsa, referensi, atau ide di kepala menjadi model 3D yang siap dicetak.</p>
+      <a href="#contact">Discuss a Design →</a></div>
+    <div class="svc reveal"><div class="emoji">✏️</div><h3>Custom Design</h3>
+      <p>Desain sesuai ukuran, fungsi, dan kebutuhan spesifik — bracket, case, gantungan kunci, apa aja.</p>
+      <a href="#contact">Start Custom Design →</a></div>
+    <div class="svc reveal"><div class="emoji">🖨️</div><h3>3D Printing</h3>
+      <p>Produksi model digital menjadi objek fisik dengan material pilihan (PLA/PETG/ABS).</p>
+      <a href="#contact">Request a Print →</a></div>
+    <div class="svc reveal"><div class="emoji">🔧</div><h3>Prototyping</h3>
+      <p>Iterasi cepat: cetak → tes → revisi, sampai bentuknya pas dengan kebutuhan.</p>
+      <a href="{{ url_for('quote_page') }}">Hitung Harga Cetak →</a></div>
+  </div>
+</div></section>
+
+<section id="products" class="strip"><div class="wrap">
+  <div class="kicker reveal">SHOP</div>
+  <h2 class="reveal">Produk siap cetak.</h2>
+  <p class="lead reveal">Desain populer yang tinggal order — atau request modif sesuai seleramu.</p>
+  <div class="products">
+    {% set reveal = true %}{% for p in products %}{% include "_prod_card.html" %}{% endfor %}
+  </div>
+</div></section>
+
+<section id="tools"><div class="wrap">
+  <div class="kicker reveal">FREE TOOLS</div>
+  <h2 class="reveal">Desain sendiri, langsung order.</h2>
+  <div class="grid4">
+    <a class="card reveal" href="{{ url_for('tool', slug='gantungan-kunci') }}"><div class="num">TOOL</div><div class="icon">🔑</div><h3>Desain Gantungan Kunci</h3><p>Ketik nama → lihat preview live → order.</p></a>
+    <a class="card reveal" href="{{ url_for('tool', slug='clicker') }}"><div class="num">TOOL</div><div class="icon">🖱️</div><h3>Desain Clicker</h3><p>Pilih model & warna clicker favoritmu.</p></a>
+    <a class="card reveal" href="{{ url_for('tool', slug='lithophane') }}"><div class="num">TOOL</div><div class="icon">🖼️</div><h3>Generator Lithophane</h3><p>Upload foto → lihat preview relief → order.</p></a>
+  </div>
+</div></section>
+
+<section id="contact"><div class="wrap">
+  <div class="contact-box reveal">
+    <div class="kicker">CONTACT</div>
+    <h2>Punya ide? Wujudkan.</h2>
+    <p class="lead">Ceritakan ide atau kebutuhanmu — REBRAY bantu dari sketsa sampai barang jadi — sebisa mungkin dari bahan daur ulang.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://wa.me/{{ wa_number }}?text={{ 'Halo REBRAY, saya mau custom desain'|urlencode }}">💬 WhatsApp</a>
+      <a class="btn btn-ghost" href="mailto:hello@bray3d.id">✉️ Email</a>
+    </div>
+  </div>
+</div></section>
+{% endblock %}
+{% block scripts %}
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+const cv = document.getElementById('bg3d');
+const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
+renderer.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .1, 100);
+camera.position.z = 7;
+scene.add(new THREE.AmbientLight(0xffffff,.5));
+const l1 = new THREE.PointLight(0x00e5a0, 60); l1.position.set(-4,3,4); scene.add(l1);
+const l2 = new THREE.PointLight(0x4f8cff, 60); l2.position.set(4,-3,4); scene.add(l2);
+const geo = new THREE.IcosahedronGeometry(2.6, 1);
+const mat = new THREE.MeshStandardMaterial({color:0x16202e, metalness:.65, roughness:.28,
+  flatShading:true});
+const mesh = new THREE.Mesh(geo, mat); scene.add(mesh);
+const wire = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
+  new THREE.LineBasicMaterial({color:0x00e5a0, transparent:true, opacity:.5}));
+wire.scale.setScalar(1.002); scene.add(wire);
+const parts=[mesh,wire];
+let mx=0,my=0;
+addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2});
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
+(function loop(t){
+  requestAnimationFrame(loop);
+  const s=t*.0004;
+  parts.forEach(p=>{p.rotation.y=s+mx*.6; p.rotation.x=Math.sin(s*.7)+my*.4;});
+  camera.position.x=mx*.8; camera.position.y=-my*.5; camera.lookAt(0,0,0);
+  renderer.render(scene,camera);
+})(0);
+
+// reveal on scroll
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+// safety: kalau JS IO gagal / print mode, pastikan konten tetap terlihat
+setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{
+  const r=el.getBoundingClientRect();
+  if(r.top<innerHeight) el.classList.add('in');
+}),1200);
+</script>
+{% endblock %}

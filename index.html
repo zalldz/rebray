@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REBRAY — Recycle Bray — From Waste to Useful</title>
+<meta name="description" content="REBRAY mengubah ide menjadi objek 3D fungsional: desain, prototyping, dan 3D printing.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>">
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0f1520; --card:#141b28;
+    --fg:#e8ecf1; --muted:#8b96a5;
+    --acc:#00e5a0; --acc2:#4f8cff; --grad:linear-gradient(135deg,#00e5a0,#4f8cff);
+    --radius:18px; --max:1160px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--fg);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6;overflow-x:hidden}
+  ::selection{background:var(--acc);color:#000}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+
+  /* ── nav ── */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(14px);
+      background:rgba(10,14,20,.72);border-bottom:1px solid rgba(255,255,255,.06)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-weight:800;font-size:1.25rem;letter-spacing:.5px}
+  .logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .navlinks{display:flex;gap:28px;font-size:.95rem;color:var(--muted)}
+  .navlinks a:hover{color:var(--acc)}
+  @media(max-width:720px){.navlinks{display:none}}
+
+  /* ── hero ── */
+  #hero{min-height:100vh;display:grid;place-items:center;position:relative;overflow:hidden}
+  #hero canvas{position:absolute;inset:0;width:100%;height:100%}
+  .hero-inner{position:relative;z-index:2;text-align:center;padding:120px 24px 60px}
+  .tag{display:inline-block;padding:6px 18px;border:1px solid rgba(0,229,160,.35);border-radius:99px;
+       color:var(--acc);font-size:.8rem;letter-spacing:3px;margin-bottom:26px;background:rgba(0,229,160,.06)}
+  h1{font-size:clamp(2.4rem,7vw,4.6rem);font-weight:800;line-height:1.08}
+  h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-sub{color:var(--muted);max-width:560px;margin:22px auto 38px;font-size:1.08rem}
+  .cta{display:inline-flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .btn{padding:14px 30px;border-radius:99px;font-weight:600;font-size:.98rem;transition:.25s}
+  .btn-primary{background:var(--grad);color:#000}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,229,160,.28)}
+  .btn-ghost{border:1px solid rgba(255,255,255,.18);color:var(--fg)}
+  .btn-ghost:hover{border-color:var(--acc);color:var(--acc)}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:.8rem;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{50%{transform:translate(-50%,8px)}}
+
+  /* ── sections ── */
+  section{padding:110px 0}
+  .kicker{color:var(--acc);font-size:.78rem;letter-spacing:3px;margin-bottom:14px}
+  h2{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;margin-bottom:18px}
+  .lead{color:var(--muted);max-width:640px;font-size:1.02rem}
+
+  .philosophy{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
+  .philosophy .lead{margin-top:16px}
+  @media(max-width:860px){.philosophy{grid-template-columns:1fr}}
+
+  .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:48px}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);
+        padding:30px 26px;transition:.3s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-6px);border-color:rgba(0,229,160,.35)}
+  .card .num{font-size:.8rem;color:var(--muted);letter-spacing:2px}
+  .card .icon{font-size:1.6rem;margin:14px 0 10px}
+  .card h3{font-size:1.15rem;margin-bottom:8px}
+  .card p{color:var(--muted);font-size:.94rem}
+
+  .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:48px}
+  .svc{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid rgba(255,255,255,.07);
+       border-radius:var(--radius);padding:34px 30px;transition:.3s}
+  .svc:hover{border-color:rgba(79,140,255,.4)}
+  .svc .emoji{font-size:2rem}
+  .svc h3{margin:16px 0 10px}
+  .svc p{color:var(--muted);font-size:.96rem;margin-bottom:18px}
+  .svc a{color:var(--acc);font-weight:600;font-size:.92rem}
+  .svc a:hover{text-decoration:underline}
+
+  /* ── shop strip ── */
+  .strip{background:var(--bg2);border-block:1px solid rgba(255,255,255,.05)}
+  .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:48px}
+  .prod{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:.3s}
+  .prod:hover{transform:translateY(-6px)}
+  .prod .thumb{height:150px;display:grid;place-items:center;font-size:3.2rem;
+      background:linear-gradient(135deg,rgba(0,229,160,.12),rgba(79,140,255,.12))}
+  .prod .body{padding:22px}
+  .prod h3{font-size:1.05rem}
+  .prod p{color:var(--muted);font-size:.88rem;margin-top:6px}
+  .prod .price{margin-top:12px;color:var(--acc);font-weight:700}
+
+  /* ── contact ── */
+  .contact-box{background:linear-gradient(160deg,rgba(0,229,160,.08),rgba(79,140,255,.08));
+    border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:56px 40px;text-align:center}
+  .contact-box .lead{margin:14px auto 34px}
+
+  footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:.88rem;text-align:center}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(26px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="logo" href="#hero">♻️ <b>REBRAY</b></a>
+  <div class="navlinks">
+    <a href="#philosophy">Filosofi</a>
+    <a href="#services">Layanan</a>
+    <a href="#products">Produk</a>
+    <a href="#tools">Tools</a>
+    <a href="#contact">Kontak</a>
+  </div>
+</div></nav>
+
+<header id="hero">
+  <canvas id="bg3d"></canvas>
+  <div class="hero-inner">
+    <span class="tag">IDEA · DESIGN · PRINT · REAL LIFE</span>
+    <h1>Dari Ide<br>menjadi <span class="grad">Objek Nyata.</span></h1>
+    <p class="hero-sub">REBRAY membantu mengubah ide menjadi produk 3D yang fungsional —
+    lewat desain, prototyping, dan 3D printing.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#products">Explore Products →</a>
+      <a class="btn btn-ghost" href="#contact">Start Custom Project</a>
+    </div>
+  </div>
+  <div class="scroll-hint">▼ scroll</div>
+</header>
+
+<section id="philosophy"><div class="wrap">
+  <div class="philosophy">
+    <div class="reveal">
+      <div class="kicker">OUR PHILOSOPHY</div>
+      <h2>Membuat hal kecil,<br>berguna.</h2>
+      <p class="lead">REBRAY berangkat dari hal sederhana: membuat sesuatu yang benar-benar berguna.
+      Desain digital, 3D modeling, prototyping, dan 3D printing digabung jadi satu alur —
+      dari ide di kepala sampai benda di tangan.</p>
+    </div>
+    <div class="grid4 reveal" style="margin-top:0">
+      <div class="card"><div class="num">01</div><div class="icon">◇</div><h3>Fungsional</h3><p>Desain dibuat dengan mempertimbangkan fungsi dan kebutuhan nyata.</p></div>
+      <div class="card"><div class="num">02</div><div class="icon">+</div><h3>Praktis</h3><p>Proses sederhana, jelas, dan dapat dikembangkan bertahap.</p></div>
+      <div class="card"><div class="num">03</div><div class="icon">○</div><h3>Personal</h3><p>Produk disesuaikan dengan ukuran, fungsi, dan selera pengguna.</p></div>
+      <div class="card"><div class="num">04</div><div class="icon">↗</div><h3>Eksploratif</h3><p>Terus mencoba cara baru supaya desain & produksi makin baik.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="services"><div class="wrap">
+  <div class="kicker reveal">WHAT WE DO</div>
+  <h2 class="reveal">Dari desain hingga bentuk nyata.</h2>
+  <p class="lead reveal">Beberapa hal yang bisa REBRAY bantu — dari kebutuhan sederhana sampai pengembangan produk awal.</p>
+  <div class="services">
+    <div class="svc reveal"><div class="emoji">🧊</div><h3>3D Modeling</h3>
+      <p>Mengubah sketsa, referensi, atau ide di kepala menjadi model 3D yang siap dicetak.</p>
+      <a href="#contact">Discuss a Design →</a></div>
+    <div class="svc reveal"><div class="emoji">✏️</div><h3>Custom Design</h3>
+      <p>Desain sesuai ukuran, fungsi, dan kebutuhan spesifik — bracket, case, gantungan kunci, apa aja.</p>
+      <a href="#contact">Start Custom Design →</a></div>
+    <div class="svc reveal"><div class="emoji">🖨️</div><h3>3D Printing</h3>
+      <p>Produksi model digital menjadi objek fisik dengan material pilihan (PLA/PETG/ABS).</p>
+      <a href="#contact">Request a Print →</a></div>
+    <div class="svc reveal"><div class="emoji">🔧</div><h3>Prototyping</h3>
+      <p>Iterasi cepat: cetak → tes → revisi, sampai bentuknya pas dengan kebutuhan.</p>
+      <a href="#contact">Start Prototyping →</a></div>
+  </div>
+</div></section>
+
+<section id="products" class="strip"><div class="wrap">
+  <div class="kicker reveal">SHOP</div>
+  <h2 class="reveal">Produk siap cetak.</h2>
+  <p class="lead reveal">Desain populer yang tinggal order — atau request modif sesuai seleramu.</p>
+  <div class="products">
+    <div class="prod reveal"><div class="thumb">🔑</div><div class="body"><h3>Gantungan Kunci Custom</h3><p>Nama, logo, atau bentuk bebas. PLA solid, ringan & kuat.</p><div class="price">dari Rp15.000</div></div></div>
+    <div class="prod reveal"><div class="thumb">🔷</div><div class="body"><h3>Clicker Fidget</h3><p>Fidget toy presisi — mekanisme klik yang memuaskan.</p><div class="price">dari Rp25.000</div></div></div>
+    <div class="prod reveal"><div class="thumb">🖼️</div><div class="body"><h3>Lithophane Foto</h3><p>Foto favorit jadi relief 3D — makin indah dengan cahaya.</p><div class="price">dari Rp45.000</div></div></div>
+    <div class="prod reveal"><div class="thumb">📦</div><div class="body"><h3>Case & Organizer</h3><p>Case alat, organizer meja, holder HP — ukuran custom.</p><div class="price">quote project</div></div></div>
+  </div>
+</div></section>
+
+<section id="tools"><div class="wrap">
+  <div class="kicker reveal">FREE TOOLS</div>
+  <h2 class="reveal">Desain sendiri, langsung order.</h2>
+  <div class="grid4">
+    <a class="card reveal" href="#contact"><div class="num">TOOL</div><div class="icon">🔑</div><h3>Desain Gantungan Kunci</h3><p>Ketik nama → lihat preview 3D → order.</p></a>
+    <a class="card reveal" href="#contact"><div class="num">TOOL</div><div class="icon">🔷</div><h3>Desain Clicker</h3><p>Pilih model & warna clicker favoritmu.</p></a>
+    <a class="card reveal" href="#contact"><div class="num">TOOL</div><div class="icon">🖼️</div><h3>Generator Lithophane</h3><p>Upload foto → generate lithophane otomatis.</p></a>
+  </div>
+</div></section>
+
+<section id="contact"><div class="wrap">
+  <div class="contact-box reveal">
+    <div class="kicker">CONTACT</div>
+    <h2>Punya ide? Wujudkan.</h2>
+    <p class="lead">Ceritakan ide atau kebutuhanmu — REBRAY bantu dari sketsa sampai barang jadi di tanganmu.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://wa.me/6282299130985?text=Halo%20REBRAY,%20gue%20mau%20custom%20desain">💬 WhatsApp</a>
+      <a class="btn btn-ghost" href="mailto:hello@bray3d.id">✉️ Email</a>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>© 2026 REBRAY — Recycle Bray — From Waste to Useful</span>
+  <span>IDEA · DESIGN · PRINT · REAL LIFE</span>
+</div></footer>
+
+<script type="module">
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+const cv = document.getElementById('bg3d');
+const renderer = new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
+renderer.setSize(innerWidth, innerHeight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .1, 100);
+camera.position.z = 7;
+scene.add(new THREE.AmbientLight(0xffffff,.5));
+const l1 = new THREE.PointLight(0x00e5a0, 60); l1.position.set(-4,3,4); scene.add(l1);
+const l2 = new THREE.PointLight(0x4f8cff, 60); l2.position.set(4,-3,4); scene.add(l2);
+const geo = new THREE.IcosahedronGeometry(2.6, 1);
+const mat = new THREE.MeshStandardMaterial({color:0x16202e, metalness:.65, roughness:.28,
+  flatShading:true});
+const mesh = new THREE.Mesh(geo, mat); scene.add(mesh);
+const wire = new THREE.LineSegments(new THREE.EdgesGeometry(geo),
+  new THREE.LineBasicMaterial({color:0x00e5a0, transparent:true, opacity:.5}));
+wire.scale.setScalar(1.002); scene.add(wire);
+const parts=[mesh,wire];
+let mx=0,my=0;
+addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2});
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
+(function loop(t){
+  requestAnimationFrame(loop);
+  const s=t*.0004;
+  parts.forEach(p=>{p.rotation.y=s+mx*.6; p.rotation.x=Math.sin(s*.7)+my*.4;});
+  camera.position.x=mx*.8; camera.position.y=-my*.5; camera.lookAt(0,0,0);
+  renderer.render(scene,camera);
+})(0);
+
+// reveal on scroll
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+// safety: kalau JS IO gagal / print mode, pastikan konten tetap terlihat
+setTimeout(()=>document.querySelectorAll('.reveal:not(.in)').forEach(el=>{
+  const r=el.getBoundingClientRect();
+  if(r.top<innerHeight) el.classList.add('in');
+}),1200);
+</script>
+</body>
+</html>

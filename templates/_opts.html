@@ -1,0 +1,1 @@
+{% set o = i.options|opts %}{% if o %}<div class="opts">{% if o.thumb %}<img src="{{ o.thumb }}" alt="Preview lithophane">{% endif %}<span>{{ o|opts_text }}</span></div>{% endif %}

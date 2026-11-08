@@ -1,0 +1,10 @@
+{% extends "_tool.html" %}
+{% from "_choice.html" import choice with context %}
+{% block lead %}Pilih foto — preview relief dibuat di browser-mu. Foto asli tidak di-upload ke server.{% endblock %}
+{% block controls %}
+<label class="field" for="foto">Foto</label>
+<input class="text" id="foto" type="file" accept="image/*">
+<p class="muted hint" id="foto-msg" role="status"></p>
+{{ choice("ukuran", "Ukuran (sisi terpanjang)", t.fields.ukuran, "15cm") }}
+{{ choice("bentuk", "Bentuk", t.fields.bentuk) }}
+{% endblock %}

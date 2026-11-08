@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }} — REBRAY{% endblock %}
+{% block content %}
+<div class="detail">
+  <div class="thumb">{{ p.emoji }}</div>
+  <div>
+    <div class="kicker"><a href="{{ url_for('shop') }}">← SHOP</a></div>
+    <h2>{{ p.name }}</h2>
+    <p class="lead">{{ p.description }}</p>
+    <div class="price">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Quote project{% endif %}</div>
+    {% if not p.price_idr %}<p class="muted" style="margin:-14px 0 22px">Harga final dikonfirmasi setelah ukuran & detail disepakati.</p>{% endif %}
+    {% set design %}{% if has_tool %}<a class="btn btn-ghost" href="{{ url_for('tool', slug=p.slug) }}">🎨 Desain Sendiri</a>{% endif %}{% endset %}
+    {% if p.is_ready_stock %}
+    <div class="cta-row">
+      <a class="btn btn-primary" href="{{ p.marketplace_url }}" target="_blank" rel="noopener">🛒 Beli di Marketplace</a>
+      {{ design }}
+    </div>
+    <p class="muted hint">Stok siap kirim dijual lewat marketplace.{% if has_tool %} Mau versi custom? Pakai Desain Sendiri.{% endif %}</p>
+    {% else %}
+    <form class="cta-row" method="post" action="{{ url_for('cart_add', slug=p.slug) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <button class="btn btn-primary" type="submit">Tambah ke Keranjang</button>
+      {{ design }}
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

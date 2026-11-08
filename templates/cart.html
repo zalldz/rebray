@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Keranjang — REBRAY{% endblock %}
+{% block content %}
+<div class="kicker">KERANJANG</div>
+<h2>Keranjang belanja</h2>
+{% if not items %}
+  <p class="lead">Keranjangmu masih kosong.</p>
+  <p style="margin-top:24px"><a class="btn btn-primary" href="{{ url_for('shop') }}">Lihat Produk →</a></p>
+{% else %}
+<div class="table-wrap"><table class="table cards">
+  <thead><tr><th>PRODUK</th><th class="num">HARGA</th><th>JUMLAH</th><th class="num">SUBTOTAL</th><th></th></tr></thead>
+  <tbody>
+  {% for i in items %}
+  <tr>
+    <td><a href="{{ url_for('product', slug=i.slug) }}">{{ i.emoji }} {{ i.name }}</a>{% include "_opts.html" %}</td>
+    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Quote project{% endif %}</td>
+    <td data-label="Jumlah"><div class="qty">
+      <form method="post" action="{{ url_for('cart_update', item_id=i.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button name="action" value="dec" aria-label="Kurangi {{ i.name }}">−</button></form>
+      <span>{{ i.qty }}</span>
+      <form method="post" action="{{ url_for('cart_update', item_id=i.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button name="action" value="inc" aria-label="Tambah {{ i.name }}">+</button></form>
+    </div></td>
+    <td class="num" data-label="Subtotal">{% if i.price_idr %}{{ (i.qty * i.price_idr)|rupiah }}{% else %}—{% endif %}</td>
+    <td class="act"><form method="post" action="{{ url_for('cart_remove', item_id=i.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="linkbtn muted" type="submit">Hapus</button></form></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<div class="summary">
+  <div class="total">Total: <b>{{ total|rupiah }}</b>{% if has_quote %} <span class="muted">+ quote project</span>{% endif %}</div>
+  <form method="post" action="{{ url_for('checkout') }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token }}">
+    <button class="btn btn-primary" type="submit">Checkout →</button>
+  </form>
+</div>
+{% if has_quote %}<p class="muted" style="margin-top:12px">Item "Quote project" akan kami hubungi untuk konfirmasi harga sebelum diproses.</p>{% endif %}
+{% endif %}
+{% endblock %}

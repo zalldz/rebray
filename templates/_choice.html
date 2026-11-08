@@ -1,0 +1,5 @@
+{% macro choice(name, label, values, default=None, swatch=False) %}
+<fieldset class="choice"><legend>{{ label }}</legend>
+{% for v in values %}<label{% if swatch %} title="{{ v|capitalize }}"{% endif %}><input type="radio" name="{{ name }}" value="{{ v }}"{% if v == (default or values[0]) %} checked{% endif %}{% if swatch %} aria-label="{{ label }} {{ v }}"{% endif %}>{% if swatch %}<span class="sw" style="--c:{{ colors[v] }}"></span>{% else %}<span class="pill">{{ v|capitalize }}</span>{% endif %}</label>{% endfor %}
+</fieldset>
+{% endmacro %}

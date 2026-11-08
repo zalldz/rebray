@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}REBRAY{% endblock %}</title>
+<meta name="description" content="REBRAY — Recycle Bray: sisa filament dan plastik daur ulang kami cetak ulang jadi barang 3D yang berguna.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% include "_nav.html" %}
+{% block body %}
+<main class="page"><div class="wrap">
+  {% include "_flashes.html" %}
+  {% block content %}{% endblock %}
+</div></main>
+{% endblock %}
+<footer><div class="wrap">
+  <span>© 2026 REBRAY — Recycle Bray — From Waste to Useful</span>
+  <span>SISA · DAUR ULANG · CETAK · BERGUNA</span>
+</div></footer>
+<script>
+(() => {
+  const nav = document.querySelector('nav'), btn = document.getElementById('burger');
+  const set = open => { nav.classList.toggle('open', open); btn.setAttribute('aria-expanded', open); };
+  btn.addEventListener('click', () => set(!nav.classList.contains('open')));
+  addEventListener('keydown', e => e.key === 'Escape' && set(false));
+  nav.querySelectorAll('.navlinks a').forEach(a => a.addEventListener('click', () => set(false)));
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

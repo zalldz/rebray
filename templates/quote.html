@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Hitung Harga Cetak — REBRAY{% endblock %}
+{% block content %}
+<div class="kicker">PRINT QUOTE</div>
+<h2>Hitung Harga Cetak</h2>
+<p class="lead">Pilih file STL-mu, kami hitung volume, berat, dan estimasi harganya. File cuma dibaca di browser, tidak dikirim ke server.</p>
+<div class="tool quote" id="quote" data-cfg='{{ cfg|tojson }}'>
+  <div class="panel">
+    <label class="drop" for="stl">
+      <span class="emoji">📐</span>
+      <b id="fname">Pilih file .stl</b>
+      <span class="muted">STL binary atau ASCII, satuan mm</span>
+    </label>
+    <input class="sr" type="file" id="stl" accept=".stl,model/stl,application/sla">
+    <p class="qerr" id="qerr" role="alert" hidden></p>
+    <fieldset class="choice"><legend>Infill</legend>
+      {% for v in (15, 20, 50, 100) %}<label><input type="radio" name="infill" value="{{ v }}"{% if v == 20 %} checked{% endif %}><span class="pill">{{ v }}%</span></label>{% endfor %}
+    </fieldset>
+    <p class="muted hint">Infill 20% cukup untuk kebanyakan barang. 50–100% untuk part yang menahan beban.</p>
+  </div>
+  <div class="panel breakdown" aria-live="polite">
+    <div class="field">RINCIAN ESTIMASI</div>
+    <dl>
+      <dt>Volume model</dt><dd id="o-vol">—</dd>
+      <dt>Estimasi berat (PLA)</dt><dd id="o-wt">—</dd>
+      <dt>Biaya filament</dt><dd id="o-fil">—</dd>
+    </dl>
+    <div class="price"><span class="muted">Harga cetak</span> <span id="o-price">—</span></div>
+    <p class="muted hint">{{ cfg.price_per_gram_idr|rupiah }}/gram, minimal {{ cfg.min_price_idr|rupiah }}. Berat sudah termasuk ±5 g untuk support & purge. {{ shipping_note }}</p>
+    <a class="btn btn-wa" id="wa" href="https://wa.me/{{ cfg.wa_number }}" aria-disabled="true" target="_blank" rel="noopener">🟢 Order via WhatsApp</a>
+    <p class="muted hint">Ini masih estimasi. Kirim file STL-nya di chat WA supaya kami cek dan kasih harga final.</p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='quote.js') }}"></script>{% endblock %}

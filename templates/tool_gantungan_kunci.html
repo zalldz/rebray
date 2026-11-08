@@ -1,0 +1,9 @@
+{% extends "_tool.html" %}
+{% from "_choice.html" import choice with context %}
+{% block lead %}Ketik nama, pilih bentuk & warna PLA — preview langsung berubah.{% endblock %}
+{% block controls %}
+<label class="field" for="nama">Nama (maks. 20 karakter)</label>
+<input class="text" id="nama" maxlength="20" required value="BRAY" autocomplete="off">
+{{ choice("bentuk", "Bentuk", t.fields.bentuk) }}
+{{ choice("warna", "Warna material", t.fields.warna, "hijau", True) }}
+{% endblock %}

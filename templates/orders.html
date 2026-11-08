@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Pesanan — REBRAY{% endblock %}
+{% block content %}
+<div class="kicker">PESANAN</div>
+<h2>Pesanan saya</h2>
+{% if not orders %}
+  <p class="lead">Belum ada pesanan.</p>
+  <p style="margin-top:24px"><a class="btn btn-primary" href="{{ url_for('shop') }}">Mulai Belanja →</a></p>
+{% else %}
+<div class="table-wrap"><table class="table cards">
+  <thead><tr><th>NO.</th><th>TANGGAL</th><th>STATUS</th><th class="num">TOTAL</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+  <tr>
+    <td><a href="{{ url_for('order_detail', order_id=o.id) }}" style="color:var(--acc)">#{{ o.id }}</a></td>
+    <td data-label="Tanggal">{{ o.created_at }} UTC</td>
+    <td data-label="Status">{% include "_status.html" %}</td>
+    <td class="num" data-label="Total">{{ o.total_idr|rupiah }}{% if o.status == 'pending-quote' %} + quote{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endif %}
+{% endblock %}
