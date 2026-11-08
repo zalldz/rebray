@@ -2,12 +2,21 @@
 {% block title %}{{ p.name }} — REBRAY{% endblock %}
 {% block content %}
 <div class="detail">
-  <div class="thumb">{{ p.emoji }}</div>
+  {% set still %}{% if p.photo %}<img src="{{ url_for('media', name=p.photo) }}" alt="{{ p.name }}">{% else %}{{ p.emoji }}{% endif %}{% endset %}
+  <div class="media">
+    {% if p.model %}
+    <div class="thumb viewer" data-model="{{ url_for('media', name=p.model) }}" role="img" aria-label="Model 3D {{ p.name }}, bisa diputar">{{ still }}</div>
+    <p class="muted hint view-hint">🧊 Geser untuk memutar, cubit/scroll untuk zoom.</p>
+    {% if p.photo %}<div class="thumb thumb-sm"><img src="{{ url_for('media', name=p.photo) }}" alt="Foto {{ p.name }}"></div>{% endif %}
+    {% else %}
+    <div class="thumb">{{ still }}</div>
+    {% endif %}
+  </div>
   <div>
-    <div class="kicker"><a href="{{ url_for('shop') }}">← SHOP</a></div>
+    <div class="kicker"><a href="{{ url_for('shop') }}">← TOKO</a></div>
     <h2>{{ p.name }}</h2>
     <p class="lead">{{ p.description }}</p>
-    <div class="price">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Quote project{% endif %}</div>
+    <div class="price">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Harga menyesuaikan{% endif %}</div>
     {% if not p.price_idr %}<p class="muted" style="margin:-14px 0 22px">Harga final dikonfirmasi setelah ukuran & detail disepakati.</p>{% endif %}
     {% set design %}{% if has_tool %}<a class="btn btn-ghost" href="{{ url_for('tool', slug=p.slug) }}">🎨 Desain Sendiri</a>{% endif %}{% endset %}
     {% if p.is_ready_stock %}
@@ -26,3 +35,4 @@
   </div>
 </div>
 {% endblock %}
+{% block scripts %}{% if p.model %}<script type="module" src="{{ url_for('static', filename='viewer3d.js') }}"></script>{% endif %}{% endblock %}

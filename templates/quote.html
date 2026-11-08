@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Hitung Harga Cetak — REBRAY{% endblock %}
 {% block content %}
-<div class="kicker">PRINT QUOTE</div>
+<div class="kicker">HITUNG HARGA</div>
 <h2>Hitung Harga Cetak</h2>
 <p class="lead">Pilih file STL-mu, kami hitung volume, berat, dan estimasi harganya. File cuma dibaca di browser, tidak dikirim ke server.</p>
 <div class="tool quote" id="quote" data-cfg='{{ cfg|tojson }}'>
@@ -12,6 +12,7 @@
       <span class="muted">STL binary atau ASCII, satuan mm</span>
     </label>
     <input class="sr" type="file" id="stl" accept=".stl,model/stl,application/sla">
+    <div class="thumb viewer" id="preview3d" hidden></div>
     <p class="qerr" id="qerr" role="alert" hidden></p>
     <fieldset class="choice"><legend>Infill</legend>
       {% for v in (15, 20, 50, 100) %}<label><input type="radio" name="infill" value="{{ v }}"{% if v == 20 %} checked{% endif %}><span class="pill">{{ v }}%</span></label>{% endfor %}
@@ -32,4 +33,13 @@
   </div>
 </div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='quote.js') }}"></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='quote.js') }}"></script>
+<script type="module">
+import { mountViewer } from "{{ url_for('static', filename='viewer3d.js') }}";
+const box = document.getElementById('preview3d');
+let dispose = null;
+addEventListener('stl-loaded', e => {
+  dispose?.(); dispose = null; box.hidden = !e.detail;
+  if (e.detail) try { dispose = mountViewer(box, e.detail); } catch { box.hidden = true; }
+});
+</script>{% endblock %}

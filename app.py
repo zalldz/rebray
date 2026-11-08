@@ -7,7 +7,7 @@ import threading
 from functools import wraps
 from urllib.parse import quote
 
-from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from flask import Flask, abort, flash, g, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from db import SITE_TEXTS, close_db, get_db, init_db
@@ -30,6 +30,9 @@ def load_secret_key():
 app = Flask(__name__)
 app.secret_key = load_secret_key()
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["MAX_CONTENT_LENGTH"] = 40 * 1024 * 1024  # STL upload ≤ 30 MB + form
+UPLOAD_DIR = os.environ.get("BRAY3D_UPLOADS", os.path.join(APP_DIR, "uploads"))
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.teardown_appcontext(close_db)
 init_db()
 
@@ -153,6 +156,11 @@ def active_products():
 @app.route("/")
 def index():
     return render_template("index.html", products=active_products())
+
+
+@app.route("/media/<name>")
+def media(name):
+    return send_from_directory(UPLOAD_DIR, name, max_age=86400)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -484,17 +492,68 @@ def product_form():
 
 PRODUCT_COLS = ("name", "emoji", "description", "price_idr", "marketplace_url", "is_ready_stock", "active")
 
+# Checked by content, not by the client-sent filename/MIME.
+PHOTO_MAGIC = {b"\xff\xd8\xff": ".jpg", b"\x89PNG\r\n\x1a\n": ".png", b"RIFF": ".webp"}
+MAX_PHOTO = 5 * 1024 * 1024
+MAX_MODEL = 30 * 1024 * 1024
+
+
+def upload_kind(field, data):
+    """File extension if `data` is a valid upload for `field`, else None."""
+    if field == "photo":
+        if len(data) > MAX_PHOTO:
+            return None
+        ext = next((e for m, e in PHOTO_MAGIC.items() if data.startswith(m)), None)
+        return None if ext == ".webp" and data[8:12] != b"WEBP" else ext
+    if len(data) > MAX_MODEL or len(data) < 84:
+        return None
+    n = int.from_bytes(data[80:84], "little")
+    return ".stl" if 84 + 50 * n == len(data) and n or data.lstrip()[:5].lower() == b"solid" else None
+
+
+def save_media(product_id, old):
+    """Apply photo/model uploads + remove checkboxes. Returns False after flashing an error."""
+    updates = {}
+    for field, label in (("photo", "Foto harus JPG/PNG/WebP maks. 5 MB."),
+                         ("model", "Model 3D harus file STL maks. 30 MB.")):
+        f = request.files.get(field)
+        if f and f.filename:
+            data = f.read()
+            if not (ext := upload_kind(field, data)):
+                flash(label, "error")
+                return False
+            name = secrets.token_hex(8) + ext
+            with open(os.path.join(UPLOAD_DIR, name), "wb") as out:
+                out.write(data)
+            updates[field] = name
+        elif request.form.get(f"remove_{field}") == "1":
+            updates[field] = None
+    if updates:
+        db = get_db()
+        with db:
+            db.execute(f"UPDATE products SET {', '.join(k + '=?' for k in updates)} WHERE id=?",
+                       [*updates.values(), product_id])
+        for k in updates:  # drop replaced files only after the DB points elsewhere
+            if old and old[k]:
+                try:
+                    os.remove(os.path.join(UPLOAD_DIR, old[k]))
+                except OSError:
+                    pass
+    return True
+
 
 @app.route("/admin/products/<int:product_id>", methods=["POST"])
 @admin_required
 def admin_product(product_id):
     if (f := product_form()) is not None:
         db = get_db()
+        old = db.execute("SELECT photo, model FROM products WHERE id=?", (product_id,)).fetchone()
         with db:
             if db.execute(f"UPDATE products SET {', '.join(c + '=?' for c in PRODUCT_COLS)} WHERE id=?",
                           [f[c] for c in PRODUCT_COLS] + [product_id]).rowcount == 0:
                 abort(404)
-        flash(f"Produk \"{f['name']}\" disimpan.")
+        if save_media(product_id, old):
+            flash(f"Produk \"{f['name']}\" disimpan.")
     return back_to_admin("#produk")
 
 
@@ -508,9 +567,10 @@ def admin_product_new():
         while db.execute("SELECT 1 FROM products WHERE slug=?", (slug,)).fetchone():
             slug, n = f"{base}-{n}", n + 1
         with db:
-            db.execute(f"INSERT INTO products(slug, {', '.join(PRODUCT_COLS)}) VALUES (?{',?' * len(PRODUCT_COLS)})",
-                       [slug] + [f[c] for c in PRODUCT_COLS])
-        flash(f"Produk \"{f['name']}\" ditambahkan.")
+            pid = db.execute(f"INSERT INTO products(slug, {', '.join(PRODUCT_COLS)}) VALUES (?{',?' * len(PRODUCT_COLS)})",
+                             [slug] + [f[c] for c in PRODUCT_COLS]).lastrowid
+        if save_media(pid, None):
+            flash(f"Produk \"{f['name']}\" ditambahkan.")
     return back_to_admin("#produk")
 
 

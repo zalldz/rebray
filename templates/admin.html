@@ -60,6 +60,10 @@
     <label class="wide"><span class="field">Deskripsi</span><textarea class="text" name="description" rows="2" maxlength="500">{{ p.description }}</textarea></label>
     <label class="wide"><span class="field">Link marketplace (Shopee/Tokopedia)</span><input class="text" name="marketplace_url" type="url" value="{{ p.marketplace_url or '' }}" placeholder="https://…"></label>
     <label class="check"><input type="checkbox" class="tick" name="is_ready_stock" value="1"{% if p.is_ready_stock %} checked{% endif %}> Ready stock (beli lewat marketplace)</label>
+    <label><span class="field">Foto produk (JPG/PNG/WebP, maks. 5 MB)</span><input class="text" type="file" name="photo" accept="image/jpeg,image/png,image/webp"></label>
+    <label><span class="field">Model 3D (STL, maks. 30 MB) — bisa diputar pembeli</span><input class="text" type="file" name="model" accept=".stl"></label>
+    {% if p.photo %}<label class="check"><img class="adm-thumb" src="{{ url_for('media', name=p.photo) }}" alt=""><input type="checkbox" class="tick" name="remove_photo" value="1"> Hapus foto</label>{% endif %}
+    {% if p.model %}<label class="check"><input type="checkbox" class="tick" name="remove_model" value="1"> Hapus model 3D (ada)</label>{% endif %}
     <label class="check"><input type="checkbox" class="tick" name="active" value="1"{% if p.active is not defined or p.active %} checked{% endif %}> Tampil di website</label>
 {% endmacro %}
 <section id="produk" class="adm">
@@ -68,8 +72,8 @@
   {% for p in products %}
   <details class="panel pedit">
     <summary><span>{{ p.emoji }} <b>{{ p.name }}</b></span>
-      <span class="muted">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Quote{% endif %}{% if p.is_ready_stock %} · Ready stock{% endif %}{% if not p.active %} · <span class="off">Disembunyikan</span>{% endif %}</span></summary>
-    <form class="settings" method="post" action="{{ url_for('admin_product', product_id=p.id) }}">{{ keep() }}
+      <span class="muted">{% if p.price_idr %}{{ p.price_idr|rupiah }}{% else %}Quote{% endif %}{% if p.is_ready_stock %} · Ready stock{% endif %}{% if p.photo %} · 📷{% endif %}{% if p.model %} · 🧊 3D{% endif %}{% if not p.active %} · <span class="off">Disembunyikan</span>{% endif %}</span></summary>
+    <form class="settings" method="post" enctype="multipart/form-data" action="{{ url_for('admin_product', product_id=p.id) }}">{{ keep() }}
       {{ product_fields(p) }}
       <button class="btn btn-primary" type="submit">Simpan Produk</button>
     </form>
@@ -77,7 +81,7 @@
   {% endfor %}
   <details class="panel pedit">
     <summary><b>➕ Tambah produk baru</b></summary>
-    <form class="settings" method="post" action="{{ url_for('admin_product_new') }}">{{ keep() }}
+    <form class="settings" method="post" enctype="multipart/form-data" action="{{ url_for('admin_product_new') }}">{{ keep() }}
       {{ product_fields({}) }}
       <button class="btn btn-primary" type="submit">Tambah Produk</button>
     </form>

@@ -11,7 +11,7 @@
   {% for i in items %}
   <tr>
     <td>{{ i.emoji }} {{ i.name }}{% include "_opts.html" %}</td>
-    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Quote project{% endif %}</td>
+    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Harga menyesuaikan{% endif %}</td>
     <td class="num" data-label="Jumlah">{{ i.qty }}</td>
     <td class="num" data-label="Subtotal">{% if i.price_idr %}{{ (i.qty * i.price_idr)|rupiah }}{% else %}—{% endif %}</td>
   </tr>

@@ -6,3 +6,4 @@ bray3d.db.bak*
 .secret_key
 .env
 nohup.out
+uploads/

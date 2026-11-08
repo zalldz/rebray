@@ -13,7 +13,7 @@
   {% for i in items %}
   <tr>
     <td><a href="{{ url_for('product', slug=i.slug) }}">{{ i.emoji }} {{ i.name }}</a>{% include "_opts.html" %}</td>
-    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Quote project{% endif %}</td>
+    <td class="num" data-label="Harga">{% if i.price_idr %}{{ i.price_idr|rupiah }}{% else %}Harga menyesuaikan{% endif %}</td>
     <td data-label="Jumlah"><div class="qty">
       <form method="post" action="{{ url_for('cart_update', item_id=i.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button name="action" value="dec" aria-label="Kurangi {{ i.name }}">−</button></form>
       <span>{{ i.qty }}</span>
@@ -32,6 +32,6 @@
     <button class="btn btn-primary" type="submit">Checkout →</button>
   </form>
 </div>
-{% if has_quote %}<p class="muted" style="margin-top:12px">Item "Quote project" akan kami hubungi untuk konfirmasi harga sebelum diproses.</p>{% endif %}
+{% if has_quote %}<p class="muted" style="margin-top:12px">Item "Harga menyesuaikan" akan kami hubungi untuk konfirmasi harga sebelum diproses.</p>{% endif %}
 {% endif %}
 {% endblock %}

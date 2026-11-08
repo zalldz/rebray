@@ -151,5 +151,8 @@ def init_db():
             conn.execute("ALTER TABLE products ADD COLUMN marketplace_url TEXT")
             conn.executemany("UPDATE products SET is_ready_stock=1, marketplace_url=? WHERE slug=?",
                              [(url, slug) for slug, url in MARKETPLACE.items()])
+        if "photo" not in columns(conn, "products"):
+            conn.execute("ALTER TABLE products ADD COLUMN photo TEXT")
+            conn.execute("ALTER TABLE products ADD COLUMN model TEXT")
         # OR IGNORE: values edited in the DB survive restarts
         conn.executemany("INSERT OR IGNORE INTO settings(key, value) VALUES (?,?)", default_settings().items())

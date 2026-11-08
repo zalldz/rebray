@@ -3,6 +3,7 @@ import json, os, re, sqlite3, tempfile
 
 os.environ["BRAY3D_DB"] = os.path.join(tempfile.mkdtemp(), "t.db")
 os.environ["SECRET_KEY"] = "test"
+os.environ["BRAY3D_UPLOADS"] = tempfile.mkdtemp()
 os.environ.pop("TELEGRAM_BOT_TOKEN", None)
 from app import app  # noqa: E402
 
@@ -16,9 +17,9 @@ def csrf():
 for path in ["/", "/shop", "/shop/clicker", "/login", "/register"]:
     assert c.get(path).status_code == 200, path
 home = c.get("/").text
-assert "REBRAY" in home and "Bray3D" not in home and "From Waste to Useful" in home
+assert "REBRAY" in home and "Bray3D" not in home and "Dari Sisa jadi Berguna" in home and "Lihat Produk" in home
 assert 'id="burger"' in home and 'aria-controls="navlinks"' in home
-assert "Rp25.000" in c.get("/shop").text and "Quote project" in c.get("/shop").text
+assert "Rp25.000" in c.get("/shop").text and "Harga menyesuaikan" in c.get("/shop").text
 assert c.get("/shop/nope").status_code == 404
 
 # stage 4: quote page + ready-stock -> marketplace
@@ -143,6 +144,29 @@ c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000"})
 for _ in range(2):
     c.post("/admin/products/new", data={**pf, "name": "Vas Bunga!", "emoji": "🌸", "price_idr": "30000"})
 assert c.get("/shop/vas-bunga").status_code == 200 and c.get("/shop/vas-bunga-2").status_code == 200
+# photo + 3D model upload: validated by content, old file deleted on replace
+import io, struct
+up = os.environ["BRAY3D_UPLOADS"]
+stl = b"\0" * 80 + struct.pack("<I", 1) + b"\0" * 50
+png = b"\x89PNG\r\n\x1a\n" + b"\0" * 20
+def upl(**files):
+    return c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000",
+                  **{k: (io.BytesIO(v), n) for k, (v, n) in files.items()}}, content_type="multipart/form-data", follow_redirects=True)
+assert "Foto harus" in upl(photo=(b"<svg onload=alert(1)>", "x.png")).text
+assert "Model 3D harus" in upl(model=(b"not an stl at all" * 10, "x.stl")).text
+assert db.execute("SELECT photo, model FROM products WHERE id=?", (cid,)).fetchone() == (None, None)
+upl(photo=(png, "a.png"), model=(stl, "m.stl"))
+photo, model = db.execute("SELECT photo, model FROM products WHERE id=?", (cid,)).fetchone()
+assert photo.endswith(".png") and model.endswith(".stl") and sorted(os.listdir(up)) == sorted([photo, model])
+assert c.get(f"/media/{model}").data == stl and c.get("/media/../app.py").status_code == 404
+pg = c.get("/shop/clicker").text
+assert f'data-model="/media/{model}"' in pg and "viewer3d.js" in pg and f'src="/media/{photo}"' in pg
+assert "🧊 3D" in c.get("/shop").text
+upl(photo=(png + b"x", "b.png"))  # replace: old photo removed
+assert photo not in os.listdir(up) and len(os.listdir(up)) == 2
+c.post(f"/admin/products/{cid}", data={**pf, "price_idr": "27000", "remove_photo": "1", "remove_model": "1"})
+assert db.execute("SELECT photo, model FROM products WHERE id=?", (cid,)).fetchone() == (None, None) and os.listdir(up) == []
+assert "viewer3d.js" not in c.get("/shop/clicker").text
 # site content
 from db import SITE_TEXTS
 content = {"csrf": t, **{k: v for k, (_l, v) in SITE_TEXTS.items()}}

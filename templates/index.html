@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}REBRAY — Recycle Bray — From Waste to Useful{% endblock %}
+{% block title %}REBRAY — Recycle Bray — Dari Sisa jadi Berguna{% endblock %}
 {% block body %}
 <div class="wrap" style="position:fixed;top:80px;left:0;right:0;z-index:40">{% include "_flashes.html" %}</div>
 <header id="hero">
@@ -9,11 +9,11 @@
     <h1>{{ site.hero_title }}<br><span class="grad">{{ site.hero_highlight }}</span></h1>
     <p class="hero-sub">{{ site.hero_sub }}</p>
     <div class="cta">
-      <a class="btn btn-primary" href="{{ url_for('shop') }}">Explore Products →</a>
-      <a class="btn btn-ghost" href="#contact">Start Custom Project</a>
+      <a class="btn btn-primary" href="{{ url_for('shop') }}">Lihat Produk →</a>
+      <a class="btn btn-ghost" href="#contact">Mulai Pesanan Custom</a>
     </div>
   </div>
-  <div class="scroll-hint">▼ scroll</div>
+  <div class="scroll-hint">▼ gulir</div>
 </header>
 
 <section id="philosophy"><div class="wrap">
@@ -33,19 +33,19 @@
 </div></section>
 
 <section id="services"><div class="wrap">
-  <div class="kicker reveal">WHAT WE DO</div>
+  <div class="kicker reveal">LAYANAN KAMI</div>
   <h2 class="reveal">Dari desain hingga bentuk nyata.</h2>
   <p class="lead reveal">Beberapa hal yang bisa REBRAY bantu — dari kebutuhan sederhana sampai pengembangan produk awal.</p>
   <div class="services">
     <div class="svc reveal"><div class="emoji">🧊</div><h3>3D Modeling</h3>
       <p>Mengubah sketsa, referensi, atau ide di kepala menjadi model 3D yang siap dicetak.</p>
-      <a href="#contact">Discuss a Design →</a></div>
+      <a href="#contact">Diskusikan Desain →</a></div>
     <div class="svc reveal"><div class="emoji">✏️</div><h3>Custom Design</h3>
       <p>Desain sesuai ukuran, fungsi, dan kebutuhan spesifik — bracket, case, gantungan kunci, apa aja.</p>
-      <a href="#contact">Start Custom Design →</a></div>
+      <a href="#contact">Mulai Desain Custom →</a></div>
     <div class="svc reveal"><div class="emoji">🖨️</div><h3>3D Printing</h3>
       <p>Produksi model digital menjadi objek fisik dengan material pilihan (PLA/PETG/ABS).</p>
-      <a href="#contact">Request a Print →</a></div>
+      <a href="#contact">Pesan Cetak →</a></div>
     <div class="svc reveal"><div class="emoji">🔧</div><h3>Prototyping</h3>
       <p>Iterasi cepat: cetak → tes → revisi, sampai bentuknya pas dengan kebutuhan.</p>
       <a href="{{ url_for('quote_page') }}">Hitung Harga Cetak →</a></div>
@@ -53,7 +53,7 @@
 </div></section>
 
 <section id="products" class="strip"><div class="wrap">
-  <div class="kicker reveal">SHOP</div>
+  <div class="kicker reveal">TOKO</div>
   <h2 class="reveal">{{ site.shop_title }}</h2>
   <p class="lead reveal">{{ site.shop_sub }}</p>
   <div class="products">

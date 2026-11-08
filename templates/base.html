@@ -6,6 +6,7 @@
 <title>{% block title %}REBRAY{% endblock %}</title>
 <meta name="description" content="REBRAY — Recycle Bray: sisa filament dan plastik daur ulang kami cetak ulang jadi barang 3D yang berguna.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>">
+<script type="importmap">{"imports":{"three":"{{ url_for('static', filename='vendor/three.module.min.js') }}"}}</script>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>

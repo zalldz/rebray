@@ -2,9 +2,9 @@
   <a class="logo" href="{{ url_for('index') }}">♻️ <b>REBRAY</b></a>
   <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navlinks"><span></span><span></span><span></span></button>
   <div class="navlinks" id="navlinks">
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="{{ url_for('shop') }}">Shop</a>
-    <div class="dd"><a href="{{ url_for('index') }}#tools">Tools ▾</a><div class="dd-menu">
+    <a href="{{ url_for('index') }}">Beranda</a>
+    <a href="{{ url_for('shop') }}">Toko</a>
+    <div class="dd"><a href="{{ url_for('index') }}#tools">Desain ▾</a><div class="dd-menu">
       {% for slug, t in tools.items() %}<a href="{{ url_for('tool', slug=slug) }}">{{ t.title }}</a>{% endfor %}
     </div></div>
     <a href="{{ url_for('quote_page') }}">Hitung Harga</a>

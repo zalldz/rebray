@@ -84,7 +84,8 @@ if (typeof document !== 'undefined') (() => {
     wa.removeAttribute('aria-disabled');
   }
 
-  function fail(text) { model = null; err.textContent = text; err.hidden = false; render(); }
+  const preview = buf => dispatchEvent(new CustomEvent('stl-loaded', { detail: buf }));  // 3D preview (viewer3d.js)
+  function fail(text) { model = null; preview(null); err.textContent = text; err.hidden = false; render(); }
 
   input.addEventListener('change', async () => {
     const f = input.files[0];
@@ -94,8 +95,10 @@ if (typeof document !== 'undefined') (() => {
     if (!/\.stl$/i.test(f.name)) return fail('File harus berformat .stl.');
     if (f.size > MAX_BYTES) return fail('File terlalu besar (maks 100 MB).');
     try {
-      model = { name: f.name, mm3: stlVolume(await f.arrayBuffer()).mm3 };
+      const buf = await f.arrayBuffer();
+      model = { name: f.name, mm3: stlVolume(buf).mm3 };
       render();
+      preview(buf);
     } catch (e) { fail(e.message); }
   });
   document.querySelectorAll('input[name=infill]').forEach(r => r.addEventListener('change', render));
